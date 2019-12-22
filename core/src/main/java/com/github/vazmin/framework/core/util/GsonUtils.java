@@ -20,7 +20,7 @@ public class GsonUtils {
      * @return String json字符串
      */
     public static <T> String toJson(T obj) {
-        return toJson(obj, null, null);
+        return toJson(obj,false);
     }
 
     /**
