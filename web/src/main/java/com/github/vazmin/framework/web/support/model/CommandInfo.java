@@ -2,8 +2,12 @@ package com.github.vazmin.framework.web.support.model;
 
 import com.github.vazmin.framework.web.support.annotation.Command;
 import com.github.vazmin.framework.web.support.enu.ItemTypeEnum;
+import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.StringJoiner;
+import java.util.stream.Collector;
 
 /**
  * 管理系统命令信息Bean，从 @Command 注解解析出代码、名称、路径等信息，构造 CommandInfo 对象。
@@ -14,8 +18,10 @@ public class CommandInfo extends BaseInfo {
     /** 所属模块 */
     private ModuleInfo module;
 
-    /** 请求方法 */
     private String method;
+
+    /** 请求方法 */
+    private RequestMethod requestMethod;
 
     /** 是否是模块入口 */
     private boolean inlet;
@@ -61,6 +67,15 @@ public class CommandInfo extends BaseInfo {
     public void setMethod(String method) {
         this.method = method;
     }
+
+    public RequestMethod getRequestMethod() {
+        return requestMethod;
+    }
+
+    public void setRequestMethod(RequestMethod requestMethod) {
+        this.requestMethod = requestMethod;
+    }
+
 
     public ModuleInfo getModule() {
         return module;
@@ -109,5 +124,54 @@ public class CommandInfo extends BaseInfo {
 
     public void setTrace(boolean trace) {
         this.trace = trace;
+    }
+
+    public Key buildKey() {
+        return new Key(getPath(), getRequestMethod());
+    }
+
+    public static class Key {
+        private String path;
+
+        private RequestMethod requestMethod;
+
+        public Key() {
+        }
+
+
+        public Key(String path, RequestMethod requestMethod) {
+            this.path = path;
+            this.requestMethod = requestMethod;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path;
+        }
+
+        public RequestMethod getRequestMethod() {
+            return requestMethod;
+        }
+
+        public void setRequestMethod(RequestMethod requestMethod) {
+            this.requestMethod = requestMethod;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Key key = (Key) o;
+            return path.equals(key.path) &&
+                    requestMethod == key.requestMethod;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(path, requestMethod);
+        }
     }
 }

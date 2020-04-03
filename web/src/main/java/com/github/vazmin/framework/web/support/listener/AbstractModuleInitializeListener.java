@@ -14,8 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -60,7 +63,7 @@ public abstract class AbstractModuleInitializeListener
 
     public abstract void updateDiscard(ModuleInfo moduleInfo);
 
-    public abstract Map<String, CommandInfo> getOldCommandMap();
+    public abstract Map<CommandInfo.Key, CommandInfo> getOldCommandMap();
 
     public abstract void saveCommand(CommandInfo commandInfo) throws ServiceProcessException;
 
@@ -169,7 +172,7 @@ public abstract class AbstractModuleInitializeListener
     private void buildModuleAndCommand(Map<String, Object> moduleBeansMap)
             throws ServiceProcessException {
         Map<String, ModuleInfo> oldModuleMap = getOldModuleMap();
-        Map<String, CommandInfo> oldCommandMap = getOldCommandMap();
+        Map<CommandInfo.Key, CommandInfo> oldCommandMap = getOldCommandMap();
         for (String key : moduleBeansMap.keySet()) {
             Class<?> moduleType = moduleBeansMap.get(key).getClass();
             String packageName = moduleType.getPackage().getName();
@@ -182,7 +185,7 @@ public abstract class AbstractModuleInitializeListener
             moduleInfo.setInletUri("");
             if (requestMapping != null) {
                 String[] values = requestMapping.value();
-                if (values != null && values.length > 0) {
+                if (values.length > 0) {
                     moduleInfo.setPath(values[0]);
                 }
             }
@@ -224,17 +227,20 @@ public abstract class AbstractModuleInitializeListener
      * @param oldCommandMap Map<String, CommandInfo> 数据库中已有的命令集合
      */
     private void buildCommand(Class<?> moduleType, ModuleInfo moduleInfo,
-                              Map<String, CommandInfo> oldCommandMap)
+                              Map<CommandInfo.Key, CommandInfo> oldCommandMap)
             throws ServiceProcessException {
         Method[] methods = moduleType.getMethods();
         for (Method method: methods) {
             Command command = AnnotationUtils.findAnnotation(method, Command.class);
             RequestMapping requestMapping =
-                    AnnotationUtils.findAnnotation(method, RequestMapping.class);
+                    AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
             if (command == null || requestMapping == null) {
                 continue;
             }
             CommandInfo commandInfo = new CommandInfo(command);
+            RequestMethod firstMethod = requestMapping.method()[0];
+            commandInfo.setRequestMethod(firstMethod);
+            commandInfo.setMethod(firstMethod.name());
             commandInfo.setPkgName(getRealClassName(moduleType.getName()) + "." + method.getName());
             commandInfo.setPath(mergePath(moduleInfo.getPath(), requestMapping.value()));
             commandInfo.setModule(moduleInfo);
@@ -246,7 +252,7 @@ public abstract class AbstractModuleInitializeListener
             }
             saveCommand(commandInfo);
             this.moduleTree.addCommandToMap(commandInfo);
-            oldCommandMap.remove(commandInfo.getPath());
+            oldCommandMap.remove(commandInfo.buildKey());
         }
     }
 
@@ -305,16 +311,13 @@ public abstract class AbstractModuleInitializeListener
      */
     private MenuInfo getBelongsToMenu(String packageName) {
         String superPackageName = packageName;
-        while (true) {
+        do {
             MenuInfo menuInfo = this.moduleTree.getMenu(superPackageName);
             if (menuInfo != null) {
                 return menuInfo;
             }
             superPackageName = getSuperPackageName(superPackageName);
-            if (superPackageName == null) {
-                break;
-            }
-        }
+        } while (superPackageName != null);
         return null;
     }
 
@@ -323,6 +326,4 @@ public abstract class AbstractModuleInitializeListener
         return index < 0 ? typeName : typeName.substring(0, index);
     }
 
-    public static void main(String[] args) {
-    }
 }

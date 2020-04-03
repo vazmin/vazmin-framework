@@ -4,6 +4,7 @@
 # Log file
 *.log
 
+
 # BlueJ files
 *.ctxt
 
@@ -26,3 +27,5 @@ hs_err_pid*
 .idea
 *.iml
 target
+
+.flattened-pom.xml

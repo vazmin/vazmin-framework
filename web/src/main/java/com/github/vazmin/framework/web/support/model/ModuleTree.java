@@ -1,7 +1,9 @@
 package com.github.vazmin.framework.web.support.model;
 
+import com.github.vazmin.framework.web.support.annotation.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.Serializable;
 import java.util.*;
@@ -33,7 +35,7 @@ public class ModuleTree implements Serializable {
     /**
      * 命令Map，<path, 命令对象>
      */
-    private Map<String, CommandInfo> commandMap;
+    private Map<CommandInfo.Key, CommandInfo> commandMap;
 
     /** 根菜单列表 */
     private List<MenuInfo> rootMenuList;
@@ -127,19 +129,15 @@ public class ModuleTree implements Serializable {
     }
 
     public void addCommandToMap(CommandInfo commandInfo) {
-        commandMap.put(commandInfo.getPath(), commandInfo);
+        commandMap.put(commandInfo.buildKey(), commandInfo);
     }
 
-    public Map<String, CommandInfo> getCommandMap() {
+    public Map<CommandInfo.Key, CommandInfo> getCommandMap() {
         return commandMap;
     }
 
-    public CommandInfo getCommand(String path) {
-        return commandMap.get(path);
-    }
-
-    public void setCommandMap(Map<String, CommandInfo> commandMap) {
-        this.commandMap = commandMap;
+    public CommandInfo getCommand(String path, RequestMethod requestMethod) {
+        return commandMap.get(new CommandInfo.Key(path, requestMethod));
     }
 
     public List<MenuInfo> getRootMenuList() {
