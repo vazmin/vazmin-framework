@@ -32,5 +32,5 @@ public @interface Module {
     boolean hideInMenu() default false;
 
     /** 允许通过身份验证的用户访问 默认不允许 */
-    boolean allowAccessAuthenticated() default false;
+    boolean common() default false;
 }

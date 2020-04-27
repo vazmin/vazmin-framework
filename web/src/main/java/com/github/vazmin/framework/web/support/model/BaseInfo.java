@@ -30,22 +30,33 @@ public class BaseInfo implements Serializable, Comparable<BaseInfo> {
     /** 图标样式标识 */
     protected String icon;
 
-    /** 允许通过身份验证的用户访问 默认不允许 */
-    protected boolean allowAccessAuthenticated;
+    /** 共同item, 不需要单独授权 */
+    protected boolean common;
 
-    public boolean equals(BaseInfo o) {
-        return o != null && Objects.equals(this.id, o.id)
-                && Objects.equals(this.parentId, o.parentId)
-                && Objects.equals(this.code, o.code)
-                && Objects.equals(this.value, o.value)
-                && Objects.equals(this.orderNumber, o.orderNumber)
-                && Objects.equals(this.pkgName, o.pkgName)
-                && Objects.equals(this.path, o.path)
-                && Objects.equals(this.enable, o.enable)
-                && Objects.equals(this.discard, o.discard)
-                && Objects.equals(this.icon, o.icon)
-                && Objects.equals(this.allowAccessAuthenticated, o.allowAccessAuthenticated);
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BaseInfo baseInfo = (BaseInfo) o;
+        return enable == baseInfo.enable &&
+                discard == baseInfo.discard &&
+                common == baseInfo.common &&
+                id.equals(baseInfo.id) &&
+                parentId.equals(baseInfo.parentId) &&
+                Objects.equals(code, baseInfo.code) &&
+                Objects.equals(value, baseInfo.value) &&
+                Objects.equals(orderNumber, baseInfo.orderNumber) &&
+                Objects.equals(pkgName, baseInfo.pkgName) &&
+                path.equals(baseInfo.path) &&
+                icon.equals(baseInfo.icon);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, parentId, code, value, orderNumber, pkgName, path, enable, discard, icon, common);
+    }
+
 
     public Long getId() {
         return id;
@@ -128,12 +139,12 @@ public class BaseInfo implements Serializable, Comparable<BaseInfo> {
     }
 
 
-    public boolean isAllowAccessAuthenticated() {
-        return allowAccessAuthenticated;
+    public boolean isCommon() {
+        return common;
     }
 
-    public void setAllowAccessAuthenticated(boolean allowAccessAuthenticated) {
-        this.allowAccessAuthenticated = allowAccessAuthenticated;
+    public void setCommon(boolean common) {
+        this.common = common;
     }
 
     /**

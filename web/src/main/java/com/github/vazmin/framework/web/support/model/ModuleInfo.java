@@ -37,14 +37,14 @@ public class ModuleInfo extends BaseInfo {
         hideInMenu = module.hideInMenu();
         icon = module.icon();
         commandList = new ArrayList<>();
-        allowAccessAuthenticated = module.allowAccessAuthenticated();
+        common = module.common();
     }
 
-    public boolean equals(ModuleInfo o) {
-        return super.equals(o)
-                && Objects.equals(this.inletUri, o.inletUri)
-                && Objects.equals(this.hideInMenu, o.hideInMenu);
-    }
+//    public boolean equals(ModuleInfo o) {
+//        return super.equals(o)
+//                && Objects.equals(this.inletUri, o.inletUri)
+//                && Objects.equals(this.hideInMenu, o.hideInMenu);
+//    }
 
     public MenuInfo getMenu() {
         return menu;

@@ -33,7 +33,7 @@ public class MenuInfo extends BaseInfo {
         icon = menu.icon();
         subMenuList = new ArrayList<>();
         moduleList = new ArrayList<>();
-        allowAccessAuthenticated = menu.allowAccessAuthenticated();
+        common = menu.common();
     }
 
     public MenuInfo getSuperMenu() {

@@ -49,16 +49,16 @@ public class CommandInfo extends BaseInfo {
         icon = command.icon();
         trace = command.trace();
         discard = false;
-        allowAccessAuthenticated = command.allowAccessAuthenticated();
+        common = command.common();
     }
 
-    public boolean equals(CommandInfo o) {
-        return super.equals(o)
-                && Objects.equals(this.inlet, o.inlet)
-                && Objects.equals(this.showInMenu, o.showInMenu)
-                && Objects.equals(this.alias, o.alias)
-                && Objects.equals(this.trace, o.trace);
-    }
+//    public boolean equals(CommandInfo o) {
+//        return super.equals(o)
+//                && Objects.equals(this.inlet, o.inlet)
+//                && Objects.equals(this.showInMenu, o.showInMenu)
+//                && Objects.equals(this.alias, o.alias)
+//                && Objects.equals(this.trace, o.trace);
+//    }
 
     public String getMethod() {
         return method;

@@ -115,6 +115,7 @@ public abstract class AbstractModuleInitializeListener
                 continue;
             }
             Menu menu = AnnotationUtils.findAnnotation(menuType, Menu.class);
+            assert menu != null;
             MenuInfo menuInfo = new MenuInfo(menu);
             menuInfo.setPkgName(packageName);
             menuInfo.setPath("");
@@ -179,6 +180,7 @@ public abstract class AbstractModuleInitializeListener
             Module module = AnnotationUtils.findAnnotation(moduleType, Module.class);
             RequestMapping requestMapping =
                     AnnotationUtils.findAnnotation(moduleType, RequestMapping.class);
+            assert module != null;
             ModuleInfo moduleInfo = new ModuleInfo(module);
             moduleInfo.setPkgName(getRealClassName(moduleType.getName()));
             moduleInfo.setPath("");
