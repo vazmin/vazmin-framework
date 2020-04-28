@@ -16,7 +16,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -287,19 +286,15 @@ public abstract class AbstractModuleInitializeListener
                 pathBuilder.append("/");
             }
             pathBuilder.append(modulePath);
-            if (!modulePath.endsWith("/")) {
-                pathBuilder.append("/");
-            }
         }
 
         if (commandPaths != null && commandPaths.length > 0) {
             String commandPath = commandPaths[0];
             if (StringUtils.isNotBlank(commandPath)) {
-                if (commandPath.startsWith("/")) {
-                    pathBuilder.append(commandPath.substring(1));
-                } else {
-                    pathBuilder.append(commandPath);
+                if (!commandPath.startsWith("/")) {
+                    pathBuilder.append("/");
                 }
+                pathBuilder.append(commandPath);
             }
         }
         return pathBuilder.toString();
