@@ -174,4 +174,10 @@ public class CommandInfo extends BaseInfo {
             return Objects.hash(path, requestMethod);
         }
     }
+
+    public boolean equalsDb(CommandInfo commandInfo) {
+        return  equalsDbBase(commandInfo) &&
+                method.equals(commandInfo.method) &&
+                inlet == commandInfo.inlet;
+    }
 }

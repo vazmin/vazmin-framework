@@ -1,6 +1,5 @@
 package com.github.vazmin.framework.web.support.model;
 
-import com.github.vazmin.framework.web.support.annotation.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMethod;

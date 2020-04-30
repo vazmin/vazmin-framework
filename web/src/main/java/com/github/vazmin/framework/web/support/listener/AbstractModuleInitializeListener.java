@@ -68,6 +68,37 @@ public abstract class AbstractModuleInitializeListener
 
     public abstract void updateDiscard(CommandInfo commandInfo);
 
+    private void saveMenu(MenuInfo menuInfo, Map<String, MenuInfo> oldMenuMap)
+            throws ServiceProcessException {
+        MenuInfo old = oldMenuMap.remove(menuInfo.getPkgName());
+        if (old == null || !menuInfo.equalsDbBase(old)) {
+            saveMenu(menuInfo);
+        } else {
+            menuInfo.setId(old.getId());
+        }
+    }
+
+    private void saveModule(ModuleInfo moduleInfo, Map<String, ModuleInfo> oldMenuMap)
+            throws ServiceProcessException {
+        ModuleInfo old = oldMenuMap.remove(moduleInfo.getPkgName());
+        if (old == null || !moduleInfo.equalsDb(old)) {
+            saveModule(moduleInfo);
+        } else {
+            moduleInfo.setId(old.getId());
+        }
+    }
+
+    private void saveCommand(
+            CommandInfo commandInfo, Map<CommandInfo.Key, CommandInfo> oldCommandMap)
+            throws ServiceProcessException {
+        CommandInfo old = oldCommandMap.remove(commandInfo.buildKey());
+        if (old == null || !commandInfo.equalsDb(old)) {
+            saveCommand(commandInfo);
+        } else {
+            commandInfo.setId(old.getId());
+        }
+    }
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         try {
@@ -78,6 +109,7 @@ public abstract class AbstractModuleInitializeListener
                 //避免重复执行
                 return;
             }
+            long start = System.currentTimeMillis();
             callCounts++;
             ApplicationContext context = contextRefreshedEvent.getApplicationContext();
             Map<String, Object> menuBeansMap = context.getBeansWithAnnotation(Menu.class);
@@ -89,6 +121,8 @@ public abstract class AbstractModuleInitializeListener
             buildModuleAndCommand(moduleBeansMap);
             moduleTree.sort();
             log.debug("AbstractModuleInitializeListener call times：" + callCounts);
+            long end = System.currentTimeMillis();
+            log.debug("Initialized the module tree in {} seconds", (end - start) / 1000.0);
         } catch (ServiceProcessException e) {
             log.error("Module init failed.");
             e.printStackTrace();
@@ -109,7 +143,7 @@ public abstract class AbstractModuleInitializeListener
         for (String key : menuBeansMap.keySet()) {
             Class<?> menuType = menuBeansMap.get(key).getClass();
             String packageName = menuType.getPackage().getName();
-            oldMenuMap.remove(packageName);
+
             if (menuMap.containsKey(packageName)) {
                 continue;
             }
@@ -124,9 +158,9 @@ public abstract class AbstractModuleInitializeListener
         //遍历菜单对象，获取其上级id，并保存（同时得到自身id）
         for (MenuInfo menuInfo: menuMap.values()) {
             if (menuInfo.getId() == null) {
-                menuInfo.setParentId(parseParentId(menuInfo.getPkgName(), menuMap));
+                menuInfo.setParentId(parseParentId(menuInfo.getPkgName(), menuMap, oldMenuMap));
                 menuInfo.setDiscard(false);
-                saveMenu(menuInfo);
+                saveMenu(menuInfo, oldMenuMap);
             }
             this.moduleTree.addMenuToMap(menuInfo);
         }
@@ -147,7 +181,8 @@ public abstract class AbstractModuleInitializeListener
      * @return Long 上级菜单id
      * @throws ServiceProcessException
      */
-    private Long parseParentId(String pkgName, Map<String, MenuInfo> menuMap)
+    private Long parseParentId(
+            String pkgName, Map<String, MenuInfo> menuMap, Map<String, MenuInfo> oldMenuMap)
             throws ServiceProcessException {
         String parentPkgName = getSuperPackageName(pkgName);
         if (parentPkgName == null) {
@@ -156,12 +191,12 @@ public abstract class AbstractModuleInitializeListener
         MenuInfo parentMenuInfo = menuMap.get(parentPkgName);
         if (parentMenuInfo != null) {
             if (parentMenuInfo.getId() == null) {
-                parentMenuInfo.setParentId(parseParentId(parentMenuInfo.getPkgName(), menuMap));
-                saveMenu(parentMenuInfo);
+                parentMenuInfo.setParentId(parseParentId(parentMenuInfo.getPkgName(), menuMap, oldMenuMap));
+                saveMenu(parentMenuInfo, oldMenuMap);
             }
             return parentMenuInfo.getId();
         } else {
-            return parseParentId(parentPkgName, menuMap);
+            return parseParentId(parentPkgName, menuMap, oldMenuMap);
         }
     }
 
@@ -201,14 +236,14 @@ public abstract class AbstractModuleInitializeListener
                 superMenu.addModule(moduleInfo);
             }
             moduleInfo.setDiscard(false);
-            saveModule(moduleInfo);
+            saveModule(moduleInfo, oldModuleMap);
             buildCommand(moduleType, moduleInfo, oldCommandMap);
             this.moduleTree.addModuleToMap(moduleInfo);
             if (StringUtils.isNotBlank(moduleInfo.getInletUri())) {
                 //更新模块入口地址
                 updateModule(moduleInfo);
             }
-            oldModuleMap.remove(moduleInfo.getPkgName());
+
         }
         //将剩余旧模块和命令标记为舍弃
         for (ModuleInfo moduleInfo: oldModuleMap.values()) {
@@ -251,9 +286,9 @@ public abstract class AbstractModuleInitializeListener
             if (commandInfo.isInlet()) {
                 moduleInfo.setInletUri(commandInfo.getPath());
             }
-            saveCommand(commandInfo);
+            saveCommand(commandInfo, oldCommandMap);
             this.moduleTree.addCommandToMap(commandInfo);
-            oldCommandMap.remove(commandInfo.buildKey());
+
         }
     }
 

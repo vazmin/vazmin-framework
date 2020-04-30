@@ -106,4 +106,9 @@ public class ModuleInfo extends BaseInfo {
             return "0";
         }
     }
+
+    public boolean equalsDb(ModuleInfo moduleInfo) {
+        return equalsDbBase(moduleInfo) &&
+                inletUri.equals(moduleInfo.getInletUri());
+    }
 }

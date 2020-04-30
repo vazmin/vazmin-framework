@@ -57,6 +57,20 @@ public class BaseInfo implements Serializable, Comparable<BaseInfo> {
         return Objects.hash(id, parentId, code, value, orderNumber, pkgName, path, enable, discard, icon, common);
     }
 
+    public boolean equalsDbBase(BaseInfo baseInfo) {
+        if (this == baseInfo) return true;
+        if (baseInfo == null) return false;
+        return parentId.equals(baseInfo.parentId) &&
+                Objects.equals(code, baseInfo.code) &&
+                Objects.equals(value, baseInfo.value) &&
+                Objects.equals(orderNumber, baseInfo.orderNumber) &&
+                Objects.equals(pkgName, baseInfo.pkgName) &&
+                path.equals(baseInfo.path) &&
+                enable == baseInfo.enable &&
+                discard == baseInfo.discard &&
+                common == baseInfo.common;
+    }
+
 
     public Long getId() {
         return id;
